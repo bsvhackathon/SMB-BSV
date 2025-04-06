@@ -1,0 +1,13 @@
+version: '3.8'
+services:
+  coolcert:
+    build: .
+    restart: always
+    ports:
+    - "3002:3002"
+    environment:
+      PORT: 3002
+      SERVER_PRIVATE_KEY: '7214956ddbef526c9d615b9424e6c049fb8f875e5d03734cd61cbc0bb452960b' # TODO (developer): Use YOUR OWN key. DO NOT leave the default one.
+      CERTIFICATE_TYPE_ID: 'AGfk/WrT1eBDXpz3mcw386Zww2HmqcIn3uY6x4Af1eo=' # Cool Person Certificate Type
+      NODE_ENV: development
+      WALLET_STORAGE_URL: 'https://storage.babbage.systems'
