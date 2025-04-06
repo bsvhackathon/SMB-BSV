@@ -28,7 +28,7 @@ function setupDatabase(): Database {
     db.run(
       `CREATE TABLE IF NOT EXISTS products (
         product_id INTEGER PRIMARY KEY AUTOINCREMENT,
-        name TEXT NOT NULL,
+        product_name TEXT NOT NULL,
         price REAL NOT NULL,
         stock INTEGER NOT NULL
       )`,
@@ -44,26 +44,26 @@ function setupDatabase(): Database {
 
   db.serialize(() => {
     const insertStmt = db.prepare(
-      `INSERT OR IGNORE INTO products (product_id, name, price, stock) VALUES (?, ?, ?, ?)`
+      `INSERT OR IGNORE INTO products (product_id, product_name, price, stock) VALUES (?, ?, ?, ?)`
     )
 
     const products = [
       {
         product_id: 1,
-        name: 'Bike',
+        product_name: 'Bike',
         price: 250.0,
         stock: 100,
       },
       {
         product_id: 2,
-        name: 'E-Bike',
+        product_name: 'E-Bike',
         price: 1000.0,
         stock: 50,
       },
     ]
 
     products.forEach((product) => {
-      insertStmt.run(product.product_id, product.name, product.price, product.stock, (err: any) => {
+      insertStmt.run(product.product_id, product.product_name, product.price, product.stock, (err: any) => {
         if (err) {
           console.error('Error inserting product:', err)
         }

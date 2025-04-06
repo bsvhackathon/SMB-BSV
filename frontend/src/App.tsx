@@ -41,47 +41,88 @@ function App() {
   const walletClient = new WalletClient('json-api');
   const certs = await walletClient.listCertificates({
     certifiers: [],
-    types: [],
+    types: ["AGfk/WrT1eBDXpz3mcw386Zww2HmqcIn3uY6x4Af1eo="],
+    limit: 1000,
   });
-  const filterCerts = certs.certificates.filter(cert => cert.fields.store_id && cert.fields.product_id && cert.fields.product_name && cert.fields.identity_key_purchaser && cert.fields.date_of_purchase);
-  
-  const decrypted: Record<string, string> = {}
-  
-  const certFields = filterCerts.map(async (cert) => {
-    for (const fieldName of Object.keys(cert.fields)) {
-      const kenc = cert.keyring[fieldName];
-      const venc = cert.fields[fieldName];
-      
-      try {
-        const vdec = await walletClient.decrypt({kenc, protocolID:[0,'AES256'],keyID:kenc})
-        decrypted[fieldName] = vdec.toString('utf-8')
-      } catch (err) {
-        console.log(err)
-        decrypted[fieldName] = '[corrupted]'
-      }
-    }
-      
-    return decrypted;
+  console.log('TotalCerts:', certs.totalCertificates);
+  console.log('Certificates:', certs.certificates);
+
+  const filterCerts = certs.certificates.filter((cert) => {
+    // console.log('Cert:', cert);
+    // console.log('Fields:', cert.fields);
+    // console.log('Keyring:', cert.keyring);
+    // console.log('Fields:', cert.fields.store_id, cert.fields.product_id, cert.fields.product_name, cert.fields.identity_key_purchaser, cert.fields.date_of_purchase);
+    const isValid = cert.fields.product_id != undefined;
+    console.log('isValid:', isValid);
+    return isValid;
   });
-  showCerts(JSON.stringify(certFields, null, 2));
+  const certsSmaller = filterCerts.map((cert) => {
+    const certFields = {
+      product_id: cert.fields.product_id,
+      product_name: cert.fields.product_name,
+      date_of_purchase: cert.fields.date_of_purchase,
+      identity_key_purchaser: cert.fields.identity_key_purchaser,
+    };
+    return certFields;
+  }
+  );
+  console.log('Filtered Certificates:', certsSmaller);
+  setCertificates(certsSmaller);
+    
+  
+  // const decrypted: Record<string, string> = {}
+  
+  // const certFields = filterCerts.map(async (cert) => {
+  //   // walletClient.decrypt()
+  //         // Decrypt certificate fields and verify them before signing
+  //         // const decryptedFields = await MasterCertificate.decryptFields(
+  //         //   walletClient,
+  //         //   cert.keyring,
+  //         //   cert.fields,
+  //         //   (req as any).auth.identityKey
+  //         // )
+  //   for (const fieldName of Object.keys(cert.fields)) {
+  //     const kenc = cert.keyring[fieldName];
+  //     const venc = cert.fields[fieldName];
+      
+  //     try {
+  //       const vdec = await walletClient.decrypt({venc, protocolID:[0,'AES256'],keyID:fieldName})
+  //       decrypted[fieldName] = vdec.toString('utf-8')
+  //     } catch (err) {
+  //       console.log(err)
+  //       decrypted[fieldName] = '[corrupted]'
+  //     }
+  //   }
+      
+  //   return decrypted;
+  // });
+  // console.log('Decrypted Certificates:', decrypted);
+  // console.log('Certificates:', certFields);
+  console.log('Filtered Certificates:', filterCerts);
+  setCertificates(filterCerts);
+  setShowModal(true);
+  // setCertificates(certFields);
+  // setShowModal(true);
+  // showCerts(JSON.stringify(certFields, null, 2));
 };
  
-  const handleGetCertificate = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleGetCertificate = async (store_id, product_id, product_name, date_of_purchase) => {
+    // e.preventDefault();
     setIsLoading(true);
     // Simulate API call
     const walletClient = new WalletClient('json-api')
+    const pubKey = await walletClient.getPublicKey({ identityKey: true })
     const result = await walletClient.acquireCertificate({
       certifier: '021268b14006a905d76c68a10974fe49ee068cbad955f74f1e3ded354b6dfb54d7',
       certifierUrl: serverUrl,
       type: 'AGfk/WrT1eBDXpz3mcw386Zww2HmqcIn3uY6x4Af1eo=',
       acquisitionProtocol: 'issuance',
       fields: {
-          store_id: 'store_id',
-          product_id: 'product_id',
-          product_name: 'product_name',
-          date_of_purchase: 'date_of_purchase',
-          identity_key_purchaser: 'identity_key_purchaser',
+          store_id: store_id,
+          product_id: product_id,
+          product_name: product_name,
+          date_of_purchase: date_of_purchase,
+          identity_key_purchaser: pubKey.publicKey,
       }
     })
     console.log(result)
@@ -157,10 +198,14 @@ function App() {
       setIsLoading(false);
     }
     // Clear the cart after checkout
+    for (const product of cart) {
+      await handleGetCertificate("123", product.product_id, product.product_name, new Date().toISOString());
+    }
     setCart([]);
-    setCertificates(sampleCertificates); // Set the sample certificates
+    fetchAndDisplayCertificates();
+    // setCertificates(); // Set the sample certificates
     // Optionally, you can redirect to a confirmation page or show a success message
-    setShowModal(true);
+    // setShowModal(true);
 
   };
 
@@ -169,7 +214,7 @@ function App() {
     
     if (product) {
       setCart([...cart, product]);
-      // In a real app, you might update stock here or call an API
+      
     }
   };
 
@@ -231,6 +276,11 @@ function App() {
                 Close
               </button>
             </div>
+             {/* <button
+        type="button"
+        onClick={fetchAndDisplayCertificates}
+        className="w-full mt-4 bg-gray-700 text-white py-2 px-4 rounded hover:bg-gray-800 transition-colors"
+      >Load Certificates</button> */}
           </div>
         </div>
       </div>
@@ -246,14 +296,15 @@ function App() {
           <div key={product.product_id} className="border rounded-lg shadow-md p-4">
             <div className="flex justify-center mb-4">
               <img 
-                src={`/api/placeholder/200/150`} 
-                alt={product.name} 
+                src={`bike.jpg`}
+                // src={`https://via.placeholder.com/150?text=${product.name}`} 
+                alt={product.product_name} 
                 className="rounded-md"
               />
             </div>
-            <h2 className="text-xl font-semibold">{product.name}</h2>
+            <h2 className="text-xl font-semibold">{product.product_name}</h2>
             <p className="text-gray-600 mt-2">${product.price.toFixed(2)}</p>
-            <p className="text-sm text-gray-500 mt-1">In stock: {product.stock}</p>
+            {/* <p className="text-sm text-gray-500 mt-1">In stock: {product.stock}</p> */}
             
             <button 
               onClick={() => handlePurchase(product.product_id)}
@@ -271,7 +322,7 @@ function App() {
           <ul className="divide-y">
             {cart.map((item, index) => (
               <li key={index} className="py-2 flex justify-between">
-                <span>{item.name}</span>
+                <span>{item.product_name}</span>
                 <span>${item.price.toFixed(2)}</span>
               </li>
             ))}
@@ -287,6 +338,10 @@ function App() {
             </button>
         </div>
       )}
+        <button
+        type="button"
+        onClick={fetchAndDisplayCertificates}
+        className="w-full mt-4 bg-gray-700 text-white py-2 px-4 rounded hover:bg-gray-800 transition-colors">Load Certificates</button>      
       <CertificateModal 
         show={showModal} 
         onClose={() => setShowModal(false)} 

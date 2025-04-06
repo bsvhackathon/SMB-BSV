@@ -20,13 +20,13 @@ export const getProducts: CertifierRoute = {
         products: [
             {
                 product_id: 1,
-                name: 'Bike',
+                product_name: 'Bike',
                 price: 250.0,
                 stock: 100,
             },
             {
                 product_id: 2,
-                name: 'E-Bike',
+                product_name: 'E-Bike',
                 price: 1000.0,
                 stock: 50,
             },
@@ -44,7 +44,7 @@ export const getProducts: CertifierRoute = {
             }
 
             db.all(
-                'SELECT product_id, name, price, stock FROM products',
+                'SELECT product_id, product_name, price, stock FROM products',
                 (err, rows) => {
                     if (err) {
                         console.error('Database error:', err)
