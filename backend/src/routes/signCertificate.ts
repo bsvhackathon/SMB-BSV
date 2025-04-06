@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import { Certificate, CertificateFieldNameUnder50Bytes, CreateActionArgs, createNonce, MasterCertificate, PushDrop, Random, SymmetricKey, Utils, VerifiableCertificate, verifyNonce } from '@bsv/sdk'
-import { certificateFields } from '../certificates/coolCert'
+import { certificateFields } from '../certificates/purchaseCert'
 import { CertifierRoute } from '../CertifierServer'
 
 /*
@@ -89,16 +89,6 @@ export const signCertificate: CertifierRoute = {
         fields,
         (req as any).auth.identityKey
       )
-
-      // Refactored check: Ensure that the "cool" field is present and equals "true"
-      /*
-      if (!decryptedFields.cool || decryptedFields.cool !== 'true') {
-        return res.status(400).json({
-          status: 'error',
-          description: 'Sorry, you are not cool enough!'
-        })
-      }
-      */
 
       // Create a revocation outpoint (logic omitted for simplicity)
       const revocationTxid = 'not supported'

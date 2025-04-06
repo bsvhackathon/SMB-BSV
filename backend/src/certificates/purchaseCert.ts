@@ -1,4 +1,4 @@
-// Cool Certificate Type Definition
+// Purchase Certificate Type Definition
 //
 // A Certifier defines one or more certificate types that they issue and manage.
 // The certificate type encompasses a list of fields and their expected and valid values.
