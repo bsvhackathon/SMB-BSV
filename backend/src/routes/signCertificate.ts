@@ -79,12 +79,14 @@ export const signCertificate: CertifierRoute = {
       )
 
       // Refactored check: Ensure that the "cool" field is present and equals "true"
+      /*
       if (!decryptedFields.cool || decryptedFields.cool !== 'true') {
         return res.status(400).json({
           status: 'error',
           description: 'Sorry, you are not cool enough!'
         })
       }
+      */
 
       // Create a revocation outpoint (logic omitted for simplicity)
       const revocationTxid = 'not supported'
