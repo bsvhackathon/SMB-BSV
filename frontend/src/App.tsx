@@ -52,7 +52,7 @@ function App() {
     // console.log('Fields:', cert.fields);
     // console.log('Keyring:', cert.keyring);
     // console.log('Fields:', cert.fields.store_id, cert.fields.product_id, cert.fields.product_name, cert.fields.identity_key_purchaser, cert.fields.date_of_purchase);
-    const isValid = cert.fields.product_id != undefined;
+    const isValid = cert.fields.product_id != undefined && cert.fields.product_name != undefined && cert.fields.identity_key_purchaser != undefined && cert.fields.date_of_purchase != undefined;
     console.log('isValid:', isValid);
     return isValid;
   });
@@ -98,8 +98,6 @@ function App() {
   // });
   // console.log('Decrypted Certificates:', decrypted);
   // console.log('Certificates:', certFields);
-  console.log('Filtered Certificates:', filterCerts);
-  setCertificates(filterCerts);
   setShowModal(true);
   // setCertificates(certFields);
   // setShowModal(true);
@@ -237,6 +235,7 @@ function App() {
             
             <div className="space-y-6">
               {certificates.map((cert, index) => (
+                console.log('Certificate:', cert),
                 <div key={index} className="border rounded-lg p-4 bg-gray-50">
                   <div className="flex justify-between mb-2">
                     <span className="font-semibold">Certificate #{index + 1}</span>
@@ -295,12 +294,25 @@ function App() {
         {products.map((product) => (
           <div key={product.product_id} className="border rounded-lg shadow-md p-4">
             <div className="flex justify-center mb-4">
-              <img 
-                src={`bike.jpg`}
+              {
+                (() => {
+                    switch (product.product_name) {
+                    case 'Bike':
+                      return <img src="https://images.singletracks.com/blog/wp-content/uploads/2016/09/IMG_1720.jpg" alt="Bike" className="rounded-md w-full h-48 object-cover" />;
+                    case 'E-Bike':
+                      return <img src="http://mensgear.net/wp-content/uploads/2017/09/HPC-Revolution-eBike-2.jpg" alt="Road Bike" className="rounded-md w-full h-48 object-cover" />;
+
+                    default:
+                      return <img src="https://via.placeholder.com/150?text=No+Image" alt="Default" className="rounded-md w-full h-48 object-cover" />;
+                    }
+                })()
+              }
+              {/* <img 
+                src={`https://images.singletracks.com/blog/wp-content/uploads/2016/09/IMG_1720.jpg`}
                 // src={`https://via.placeholder.com/150?text=${product.name}`} 
                 alt={product.product_name} 
                 className="rounded-md"
-              />
+              /> */}
             </div>
             <h2 className="text-xl font-semibold">{product.product_name}</h2>
             <p className="text-gray-600 mt-2">${product.price.toFixed(2)}</p>
