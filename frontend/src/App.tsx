@@ -1,10 +1,43 @@
 import React, { useState } from 'react';
 import { GithubIcon, ShieldCheck, Server, BookOpen, ArrowRight, Sparkles } from 'lucide-react';
-import { WalletClient } from '@bsv/sdk'
+import { WalletClient } from '@bsv/sdk';
+import { Buffer } from 'buffer';
 
 function App() {
   const [serverUrl, setServerUrl] = useState('http://localhost:3002');
   const [isLoading, setIsLoading] = useState(false);
+  const [certsJSON, showCerts] = useState<string | null>(null);
+  
+ const fetchAndDisplayCertificates = async () => {
+  const walletClient = new WalletClient('json-api');
+  const certs = await walletClient.listCertificates({
+    certifiers: [],
+    types: [],
+  });
+  const filterCerts = certs.certificates.filter(cert => cert.fields.store_id && cert.fields.product_id && cert.fields.product_name && cert.fields.identity_key_purchaser && cert.fields.date_of_purchase);
+  
+  const decrypted: Record<string, string> = {}
+  
+  const certFields = filterCerts.map(async (cert) => {
+    for (const fieldName of Object.keys(cert.fields)) {
+      const kenc = cert.keyring[fieldName];
+      const venc = cert.fields[fieldName];
+      
+      try {
+        const vdec = await walletClient.decrypt({kenc, protocolID:[0,'AES256'],keyID:kenc})
+        decrypted[fieldName] = vdec.toString('utf-8')
+      } catch (err) {
+        console.log(err)
+        decrypted[fieldName] = '[corrupted]'
+      }
+    }
+      
+    return decrypted;
+  });
+  showCerts(JSON.stringify(certFields, null, 2));
+};
+ 
+  ///
 
   const handleGetCertificate = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -17,21 +50,32 @@ function App() {
       type: 'AGfk/WrT1eBDXpz3mcw386Zww2HmqcIn3uY6x4Af1eo=',
       acquisitionProtocol: 'issuance',
       fields: {
-        cool: 'true'
+          store_id: 'store_id',
+          product_id: 'product_id',
+          product_name: 'product_name',
+          date_of_purchase: 'date_of_purchase',
+          identity_key_purchaser: 'identity_key_purchaser',
       }
     })
     console.log(result)
     setIsLoading(false)
-    const certs = await walletClient.listCertificates({
-      certifiers: [],
-      types: []
-    });
-    console.log(certs)
   };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-purple-50">
+      <button
+        type="button"
+        onClick={fetchAndDisplayCertificates}
+        className="w-full mt-4 bg-gray-700 text-white py-2 px-4 rounded hover:bg-gray-800 transition-colors"
+      >Load Certificates</button>
+
       <div className="max-w-4xl mx-auto px-4 py-12">
+        {certsJSON && (
+          <div className="max-w-4xl mx-auto px-4 py-4 mb-4 bg-gray-100 rounded shadow">
+            <h2 className="text-lg font-semibold text-gray-700 mb-2">Purchase Certificates:</h2>
+            <pre className="text-sm overflow-auto whitespace-pre-wrap">{certsJSON}</pre>
+          </div>
+        )}
         {/* Header */}
         <div className="text-center mb-12">
           <div className="flex items-center justify-center gap-2 mb-4">
