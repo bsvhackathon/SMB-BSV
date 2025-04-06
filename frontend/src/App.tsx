@@ -14,8 +14,9 @@ function App() {
     certifiers: [],
     types: [],
   });
-  const filterCerts = certs.certificates.filter(cert => cert.fields.product_id && cert.fields.product_name && cert.fields.identity_key_purchaser && cert.fields.date_of_purchase);
+  const filterCerts = certs.certificates.filter(cert => cert.fields.store_id && cert.fields.product_id && cert.fields.product_name && cert.fields.identity_key_purchaser && cert.fields.date_of_purchase);
   const certFields = filterCerts.map(cert => ({
+          store_id: cert.fields.store_id,
           product_id: cert.fields.product_id,
           product_name: cert.fields.product_name,
           date_of_purchase: cert.fields.date_of_purchase,
@@ -37,6 +38,7 @@ function App() {
       type: 'AGfk/WrT1eBDXpz3mcw386Zww2HmqcIn3uY6x4Af1eo=',
       acquisitionProtocol: 'issuance',
       fields: {
+          store_id: 'store_id',
           product_id: 'product_id',
           product_name: 'product_name',
           date_of_purchase: 'date_of_purchase',
