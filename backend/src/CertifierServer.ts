@@ -3,6 +3,7 @@ import express, { Request, Response } from 'express'
 import { AuthMiddlewareOptions, createAuthMiddleware } from '@bsv/auth-express-middleware'
 import { createPaymentMiddleware } from '@bsv/payment-express-middleware'
 import * as routes from './routes'
+import { Database } from 'sqlite3'
 
 export interface CertifierServerOptions {
   port: number
@@ -27,13 +28,15 @@ export class CertifierServer {
   private readonly port: number
   wallet: WalletInterface
   private readonly monetize: boolean
+  private readonly products: Database
   private readonly calculateRequestPrice?: (req: Request) => number | Promise<number>
 
-  constructor(storage: any, options: CertifierServerOptions) {
+  constructor(storage: any, options: CertifierServerOptions, db: Database) {
     this.port = options.port
     this.wallet = options.wallet
     this.monetize = options.monetize
     this.calculateRequestPrice = options.calculateRequestPrice
+    this.products = db
 
     this.setupRoutes()
   }
@@ -75,6 +78,8 @@ export class CertifierServer {
     const theRoutes: CertifierRoute[] = [
       // routes.verifyAttributes,
       routes.signCertificate,
+      routes.getProducts,
+      routes.checkoutCart,
       // routes.checkVerification,
       // routes.revokeCertificate
     ]
@@ -90,6 +95,10 @@ export class CertifierServer {
     this.app.listen(this.port, () => {
       console.log(`CertifierServer listening at http://localhost:${this.port}`)
     })
+  }
+
+  getProductsDB(): Database {
+    return this.products
   }
 
   /**

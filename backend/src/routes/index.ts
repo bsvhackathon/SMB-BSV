@@ -1,4 +1,6 @@
 // export * from './checkVerification'
 export * from './signCertificate'
+export * from './getProducts'
+export * from './checkoutCart'
 // export * from './revokeCertificate'
 // export * from './verifyAttributes'
