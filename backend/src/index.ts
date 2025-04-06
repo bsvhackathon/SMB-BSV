@@ -11,7 +11,7 @@ dotenv.config()
 const {
   NODE_ENV = 'development',
   BSV_NETWORK = 'main',
-  PORT:HTTP_PORT = 8080,
+  PORT:HTTP_PORT = 3002,
   SERVER_PRIVATE_KEY,
   WALLET_STORAGE_URL
 } = process.env

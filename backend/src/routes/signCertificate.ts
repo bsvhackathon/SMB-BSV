@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import { Certificate, CertificateFieldNameUnder50Bytes, CreateActionArgs, createNonce, MasterCertificate, PushDrop, Random, SymmetricKey, Utils, VerifiableCertificate, verifyNonce } from '@bsv/sdk'
-import { certificateFields } from '../certificates/coolCert'
+import { certificateFields } from '../certificates/purchaseCert'
 import { CertifierRoute } from '../CertifierServer'
 
 /*
@@ -20,10 +20,18 @@ export const signCertificate: CertifierRoute = {
     type: 'jVNgF8+rifnz00856b4TkThCAvfiUE4p+t/aHYl1u0c=',
     clientNonce: 'VhQ3UUGl4L76T9v3M2YLd/Es25CEwAAoGTowblLtM3s=',
     fields: {
-      cool: 'encrypted_value_here'
+          store_id: 'encrypted_value_here',
+          product_id: 'encrypted_value_here',
+          product_name: 'encrypted_value_here',
+          date_of_purchase: 'encrypted_value_here',
+          identity_key_purchaser: 'encrypted_value_here',
     },
     keyring: {
-      cool: 'Eb8Nc9euJNuXNDRH4/50EQBbSRWWEJ5AvJKB/BFHNWcGIljSt1jE2RMQJmJPXi/OkaQuJuT0CGduPDlh3WbBtBztWXPzxcgdIifNpkV9Cp4='
+          store_id: 'Eb8Nc9euJNuXNDRH4/50EQBbSRWWEJ5AvJKB/BFHNWcGIljSt1jE2RMQJmJPXi/OkaQuJuT0CGduPDlh3WbBtBztWXPzxcgdIifNpkV9Cp4=',
+          product_id: 'Eb8Nc9euJNuXNDRH4/50EQBbSRWWEJ5AvJKB/BFHNWcGIljSt1jE2RMQJmJPXi/OkaQuJuT0CGduPDlh3WbBtBztWXPzxcgdIifNpkV9Cp4=',
+          product_name: 'Eb8Nc9euJNuXNDRH4/50EQBbSRWWEJ5AvJKB/BFHNWcGIljSt1jE2RMQJmJPXi/OkaQuJuT0CGduPDlh3WbBtBztWXPzxcgdIifNpkV9Cp4=',
+          date_of_purchase: 'Eb8Nc9euJNuXNDRH4/50EQBbSRWWEJ5AvJKB/BFHNWcGIljSt1jE2RMQJmJPXi/OkaQuJuT0CGduPDlh3WbBtBztWXPzxcgdIifNpkV9Cp4=',
+          identity_key_purchaser: 'Eb8Nc9euJNuXNDRH4/50EQBbSRWWEJ5AvJKB/BFHNWcGIljSt1jE2RMQJmJPXi/OkaQuJuT0CGduPDlh3WbBtBztWXPzxcgdIifNpkV9Cp4=',
     }
   },
   exampleResponse: {
@@ -32,7 +40,11 @@ export const signCertificate: CertifierRoute = {
       subject: '02a1c81d78f5c404fd34c418525ba4a3b52be35328c30e67234bfcf30eb8a064d8',
       serialNumber: 'C9JwOFjAqOVgLi+lK7HpHlxHyYtNNN/Fgp9SJmfikh0=',
       fields: {
-        cool: 'true'
+          store_id: 'store_id',
+          product_id: 'product_id',
+          product_name: 'product_name',
+          date_of_purchase: 'date_of_purchase',
+          identity_key_purchaser: 'identity_key_purchaser',
       },
       revocationOutpoint: '000000000000000000000000000000000000000000000000000000000000000000000000',
       certifier: '025384871bedffb233fdb0b4899285d73d0f0a2b9ad18062a062c01c8bdb2f720a',
@@ -77,14 +89,6 @@ export const signCertificate: CertifierRoute = {
         fields,
         (req as any).auth.identityKey
       )
-
-      // Refactored check: Ensure that the "cool" field is present and equals "true"
-      if (!decryptedFields.cool || decryptedFields.cool !== 'true') {
-        return res.status(400).json({
-          status: 'error',
-          description: 'Sorry, you are not cool enough!'
-        })
-      }
 
       // Create a revocation outpoint (logic omitted for simplicity)
       const revocationTxid = 'not supported'
