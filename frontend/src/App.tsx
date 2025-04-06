@@ -1,12 +1,12 @@
 import React, { useState } from 'react';
 import { GithubIcon, ShieldCheck, Server, BookOpen, ArrowRight, Sparkles } from 'lucide-react';
-import { WalletClient } from '@bsv/sdk'
+import { WalletClient } from '@bsv/sdk';
+import { Buffer } from 'buffer';
 
 function App() {
   const [serverUrl, setServerUrl] = useState('http://localhost:3002');
   const [isLoading, setIsLoading] = useState(false);
   const [certsJSON, showCerts] = useState<string | null>(null);
-
   
  const fetchAndDisplayCertificates = async () => {
   const walletClient = new WalletClient('json-api');
@@ -15,13 +15,25 @@ function App() {
     types: [],
   });
   const filterCerts = certs.certificates.filter(cert => cert.fields.store_id && cert.fields.product_id && cert.fields.product_name && cert.fields.identity_key_purchaser && cert.fields.date_of_purchase);
-  const certFields = filterCerts.map(cert => ({
-          store_id: cert.fields.store_id,
-          product_id: cert.fields.product_id,
-          product_name: cert.fields.product_name,
-          date_of_purchase: cert.fields.date_of_purchase,
-          identity_key_purchaser: cert.fields.identity_key_purchaser,
-  }));
+  
+  const decrypted: Record<string, string> = {}
+  
+  const certFields = filterCerts.map(async (cert) => {
+    for (const fieldName of Object.keys(cert.fields)) {
+      const kenc = cert.keyring[fieldName];
+      const venc = cert.fields[fieldName];
+      
+      try {
+        const vdec = await walletClient.decrypt({kenc, protocolID:[0,'AES256'],keyID:kenc})
+        decrypted[fieldName] = vdec.toString('utf-8')
+      } catch (err) {
+        console.log(err)
+        decrypted[fieldName] = '[corrupted]'
+      }
+    }
+      
+    return decrypted;
+  });
   showCerts(JSON.stringify(certFields, null, 2));
 };
  

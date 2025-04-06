@@ -17,6 +17,10 @@ import { Base64String, CertificateFieldNameUnder50Bytes } from "@bsv/sdk"
 // be associated with the certificate owner.
 export const certificateType: Base64String = 'h53Tvo8w3nqeF2cPyuRUc/B+gjPXJ3gPS2PKFBZfpDw='
 export const certificateDefinition: Record<CertificateFieldNameUnder50Bytes, string> = {
-  cool: 'true'
+          store_id: 'store_id',
+          product_id: 'product_id',
+          product_name: 'product_name',
+          date_of_purchase: 'date_of_purchase',
+          identity_key_purchaser: 'identity_key_purchaser',
 }
 export const certificateFields: CertificateFieldNameUnder50Bytes[] = Object.keys(certificateDefinition)
