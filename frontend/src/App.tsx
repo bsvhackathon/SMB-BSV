@@ -48,13 +48,16 @@ function App() {
   console.log('Certificates:', certs.certificates);
 
   const filterCerts = certs.certificates.filter((cert) => {
-    // console.log('Cert:', cert);
-    // console.log('Fields:', cert.fields);
-    // console.log('Keyring:', cert.keyring);
-    // console.log('Fields:', cert.fields.store_id, cert.fields.product_id, cert.fields.product_name, cert.fields.identity_key_purchaser, cert.fields.date_of_purchase);
     const isValid = cert.fields.product_id != undefined && cert.fields.product_name != undefined && cert.fields.identity_key_purchaser != undefined && cert.fields.date_of_purchase != undefined;
     console.log('isValid:', isValid);
     return isValid;
+  });
+  filterCerts.forEach(async (cert) => {
+    walletClient.proveCertificate({
+      certificate: cert,
+      fieldsToReveal: ['store_id','product_id','product_name','date_of_purchase','identity_key_purchaser'],
+      verifierPublicIdentityKey: await walletClient.getPublicKey({identityKey: true})
+    });
   });
   const certsSmaller = filterCerts.map((cert) => {
     const certFields = {
@@ -68,40 +71,6 @@ function App() {
   );
   console.log('Filtered Certificates:', certsSmaller);
   setCertificates(certsSmaller);
-    
-  
-  // const decrypted: Record<string, string> = {}
-  
-  // const certFields = filterCerts.map(async (cert) => {
-  //   // walletClient.decrypt()
-  //         // Decrypt certificate fields and verify them before signing
-  //         // const decryptedFields = await MasterCertificate.decryptFields(
-  //         //   walletClient,
-  //         //   cert.keyring,
-  //         //   cert.fields,
-  //         //   (req as any).auth.identityKey
-  //         // )
-  //   for (const fieldName of Object.keys(cert.fields)) {
-  //     const kenc = cert.keyring[fieldName];
-  //     const venc = cert.fields[fieldName];
-      
-  //     try {
-  //       const vdec = await walletClient.decrypt({venc, protocolID:[0,'AES256'],keyID:fieldName})
-  //       decrypted[fieldName] = vdec.toString('utf-8')
-  //     } catch (err) {
-  //       console.log(err)
-  //       decrypted[fieldName] = '[corrupted]'
-  //     }
-  //   }
-      
-  //   return decrypted;
-  // });
-  // console.log('Decrypted Certificates:', decrypted);
-  // console.log('Certificates:', certFields);
-  setShowModal(true);
-  // setCertificates(certFields);
-  // setShowModal(true);
-  // showCerts(JSON.stringify(certFields, null, 2));
 };
  
   const handleGetCertificate = async (store_id, product_id, product_name, date_of_purchase) => {
